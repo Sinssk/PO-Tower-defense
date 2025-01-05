@@ -9,7 +9,7 @@ public class MapGame{
     private List<double[]> coordPatern = new ArrayList<>();
     private List<List<Case>> cases = new ArrayList<>();
 
-    private double scale;
+    public static double scale;
     private double mX;
     private double mY;
     private double currentX;
@@ -21,8 +21,6 @@ public class MapGame{
     private final double[] b3 = {855, 415, 138, 35};
     private final double[] b4 = {855, 340, 138, 35};
     private final double[] b5 = {855, 265, 138, 35};
-
-    int test = 0;
 
     //cration de la fenêtre (x: [-12; 1012], y: [-10; 710]) --> 1024 X 720
     //taille map lvl --> x = patern.get(0).length() y = patern.size()
@@ -57,10 +55,8 @@ public class MapGame{
             currentY = 700-350/scale;
 
         } catch (IOException e){
-            System.out.println("Fichier map non trouvé : " + filePath);
-            e.printStackTrace();
+            System.out.println("Fichier map non trouvé : " + e);
         }
-
         int yc = 0;
         for (String line : map){
             int xc = 0;
@@ -78,19 +74,15 @@ public class MapGame{
                     case 'C' -> cases.get(yc).add(new CaseC(coord, xyCoord));
                     case 'R' -> {
                         cases.get(yc).add(new CaseR(coord, xyCoord));
-                        coordPatern.add(cases.get(yc).getLast().getCoord());
                     }
                     case 'S' -> {
                         cases.get(yc).add(new CaseS(coord, xyCoord));
-                        coordPatern.add(cases.get(yc).getLast().getCoord());
                     }
                     case 'B' -> {
                         cases.get(yc).add(new CaseB(coord, xyCoord));
-                        coordPatern.add(cases.get(yc).getLast().getCoord());
                     }
-                    default -> {}
+                    default -> {}//Execption
                 }
-
                 currentX+=700/scale;
                 xc+=1;
             }
@@ -98,7 +90,42 @@ public class MapGame{
             currentX=350/scale;
             currentY-=(700/scale);
         }
-        StdDraw.show();
+        loadEnemyPatern();
+    }
+
+    private void loadEnemyPatern(){
+        Case s = getCaseS();
+        Case b = getCaseB();
+        coordPatern.add(s.getCoord());
+        int x = s.getXyPosition()[0];
+        int y = s.getXyPosition()[1];
+        double[] cLast = s.getCoord();
+
+        while (coordPatern.getLast() != b.getCoord()){
+            
+            //on regarde les 4 cases adjacentes
+            Case gauche = cases.get(y).get(x-1);
+            Case haut   = cases.get(y-1).get(x);
+            Case droite = cases.get(y).get(x+1);
+            Case bas    = cases.get(y+1).get(x);
+
+            //on vérifie qu'on ne revienne pas sur la case qui viens d'être parcourue
+            if (coordPatern.size() > 1) cLast = coordPatern.get(coordPatern.size()-2); 
+
+            if (gauche.getCoord() != cLast && (gauche instanceof CaseR || gauche instanceof CaseB)){
+                coordPatern.add(gauche.getCoord());
+                x -=1;
+            } else if (haut.getCoord() != cLast && (haut instanceof CaseR || haut instanceof CaseB)){
+                coordPatern.add(haut.getCoord());
+                y -=1;
+            } else if (droite.getCoord() != cLast && (droite instanceof CaseR || droite instanceof CaseB)){
+                coordPatern.add(droite.getCoord());
+                x +=1;
+            } else if (bas.getCoord() != cLast && (bas instanceof CaseR || bas instanceof CaseB)){
+                coordPatern.add(bas.getCoord());
+                y +=1;
+            }
+        }
     }
 
     private void drawMap(){
@@ -179,7 +206,6 @@ public class MapGame{
                 clikedCase = null;
             }
         }
-        
     }
 
     public void setClikedCaseNull(){
@@ -326,14 +352,16 @@ public class MapGame{
                 if (c instanceof CaseS) return c; 
             }
         }
-        return null;
+        return null;//Exception
+    }
 
-        //proposition de chatgpt :
-        //return cases.stream()
-        //       .flatMap(List::stream)
-        //       .filter(c -> c instanceof CaseS)
-        //       .findFirst()
-        //       .orElse(null);
+    public Case getCaseB() {
+        for (List<Case> line : cases) {
+            for (Case c : line) {
+                if (c instanceof CaseB) return c; 
+            }
+        }
+        return null;//Exception
     }
 
     public List<double[]> getEnnemyPatern(){

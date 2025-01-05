@@ -1,10 +1,11 @@
-
 import java.awt.Color;
+import java.util.Collections;
+import java.util.List;
 
 public abstract class Enemy {
     private final int maxHp;
-    private int hp;
-    private final int atk;
+    private double hp;
+    private final double atk;
     private final double atkSpeed;
     private final double speed;
     private final int range;
@@ -13,7 +14,11 @@ public abstract class Enemy {
     private final double d;//diamètre de l'ennemi
     private final Color c;// couleur de l'ennemi
     private double[] coord;
-    private double spawn;
+    private final double spawn; // timing de spawn
+    private int i;
+    private double lastAttack;
+    private Boolean show;
+    private List<Enemy> mostAdvanced = Game.spawnedEnemies;
 
     public Enemy(int maxHp, int hp, int atk, double atkSpeed, double speed, int range, Element e, int reward, double d, Color c, double[] coord, double spawn){
         this.maxHp = maxHp;
@@ -28,6 +33,9 @@ public abstract class Enemy {
         this.c = c;
         this.coord = coord;
         this.spawn = spawn;
+        this.i = 0;
+        this.lastAttack = 0;
+        this.show = false;
     }
 
     public void draw(){
@@ -47,30 +55,75 @@ public abstract class Enemy {
                 StdDraw.setPenColor(Color.RED);
                 StdDraw.filledRectangle(coord[0]+20-(missingHp/5), coord[1]+d+10, missingHp/5, 3);
             }
+            this.show = true;
         }
     }
 
-    public void moveTo(double[] nextC){
-        if      ((coord[0] == nextC[0])&&(coord[1] < nextC[1])) {coord[1] += speed;}//aller vers haut
-        else if ((coord[0] == nextC[0])&&(coord[1] > nextC[1])) {coord[1] -= speed;}//aller vers bas
-        else if ((coord[1] == nextC[1])&&(coord[0] < nextC[0])) {coord[0] += speed;}//aller vers droite
-        else if ((coord[1] == nextC[1])&&(coord[0] > nextC[0])) {coord[0] -= speed;}//aller vers gauche
-        
+    public void moveTo(double[] nextC){//chatgpt
+        double[] direction = {nextC[0] - coord[0], nextC[1] - coord[1]};
+        double distance = Math.sqrt(direction[0] * direction[0] + direction[1] * direction[1]);
+        if (distance > 0) {
+            double scale = Math.min((speed/2 )/ distance, 1);
+            coord[0] += direction[0] * scale;
+            coord[1] += direction[1] * scale;
+        }
     }
 
+    public void updateAdvanced(){
+        for (int k = 0; k <mostAdvanced.size()-1; k+=2){
+            double[] e1 = mostAdvanced.get(k).getCoord();
+            double[] e2 = mostAdvanced.get(k+1).getCoord();
+            if (e2[0] - e1[0] == 0 && e2[1] - e2[1] < 0 || //comparer les positions sur l'axe des x
+            (e2[1] - e1[1] == 0 && e2[0] - e2[0] < 0)) // sur l'axe des y
+
+            Collections.swap(mostAdvanced, k, k+1);
+        }
+    }
+
+    public Boolean inRange(Tour t){
+        double[] a = t.getCoord();
+        double x = (a[0] - coord[0]);
+        double y = (a[1] - coord[1]);
+        return Math.sqrt(x*x + y*y) < (350/MapGame.scale)*2*range;
+    }
+
+    public abstract List<Tour> cible();
+
+
+    public Boolean isShow(){
+        return show;
+    }
+    public void setShow(Boolean b){
+        show = b;
+    }
+
+    public void setLastAttack(double deltatime){
+        lastAttack = deltatime;
+    }
+
+    public double getLastAttack(){
+        return lastAttack;
+    }
+
+    public void increment_i(){
+        i += 1;
+    }
+    public int get_i(){
+        return i;
+    }
     public boolean alive(){
         return hp > 0;
     }
-    public void setHp(int n){
+    public void setHp(double n){
         hp = n;
     }
     public int getMaxHp() {
         return maxHp;
     }
-    public int getHp() {
+    public double getHp() {
         return hp;
     }
-    public int getAtk() {
+    public double getAtk() {
         return atk;
     }
     public double getAtkSpeed() {
@@ -100,7 +153,4 @@ public abstract class Enemy {
     public double getSpawn(){
         return spawn;
     }
-    public abstract String getType();
-    
 }
-

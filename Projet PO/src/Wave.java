@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class Wave {
 
     public List<Enemy> createEnemies(String waveName, double[] c){
@@ -25,6 +24,8 @@ public class Wave {
                     ens.add(new EEarthBrute(c.clone(), Double.parseDouble(timing[0])));
                 }else if (enemy.contains("Boss")){
                     ens.add(new EBoss(c.clone(), Double.parseDouble(timing[0])));
+                }else{
+                    // UnknownEnemyExecption;
                 }
             }
         }catch (IOException e) {

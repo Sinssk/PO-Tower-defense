@@ -16,7 +16,7 @@ public class CaseC extends Case{
     }
 
     public void setColorDark(boolean t){
-        if (t) c = Color.DARK_GRAY;
+        if (t) c = Color.DARK_GRAY.brighter().brighter();
         else c = Color.LIGHT_GRAY;
     }
 }

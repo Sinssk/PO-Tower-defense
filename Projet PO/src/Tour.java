@@ -1,15 +1,17 @@
 import java.awt.Color;
+import java.util.List;
 
 public abstract class Tour {
-    private int hp;
+    private double hp;
     private final int maxHp;
-    private final int atk;
+    private final double atk;
     private final double atkSpeed;
     private final double range;
     private final Element e;
     private final int cost;
     private final double[] coord;
     private final Color c;
+    private double lastAttack;
 
     public Tour(int hp, int maxHp, int atk, double atkSpeed, double range, Element e, int cost, double[] coord, Color c) {
         this.hp = hp;
@@ -21,6 +23,7 @@ public abstract class Tour {
         this.cost = cost;
         this.coord = coord;
         this.c = c;
+        this.lastAttack = 0;
     }
 
     public void draw(){
@@ -33,17 +36,35 @@ public abstract class Tour {
         if (hp < maxHp){//vie manquante en rouge
             double missingHp= (maxHp-hp)*100/maxHp;
             StdDraw.setPenColor(Color.RED);
-            StdDraw.filledRectangle(coord[0]+20-(missingHp/5), coord[1]+40, missingHp/5, 3);
+            StdDraw.filledRectangle(coord[0]+20-(missingHp/5), coord[1]+25, missingHp/5, 3);
         }
     }
 
-    public void setHp(int n){
+    public abstract List<Enemy> cible();
+
+    // AB = sqrt( (Xb - Xa)² + (Yb - Ya)² )
+    public Boolean inRange(Enemy enem){
+        double[] a = enem.getCoord();
+        double x = (a[0] - coord[0]);
+        double y = (a[1] - coord[1]);
+        return Math.sqrt(x*x + y*y) < (350/MapGame.scale)*2*range;
+    }
+
+    public void setLastAttack(double deltatime){
+        lastAttack = deltatime;
+    }
+
+    public double getLastAttack(){
+        return lastAttack;
+    }
+
+    public void setHp(double n){
         hp= n;
     }
-    public int getHp() {
+    public double getHp() {
         return hp;
     }
-    public int getAtk() {
+    public double getAtk() {
         return atk;
     }
     public double getAtkSpeed() {

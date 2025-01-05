@@ -15,31 +15,26 @@ public class Game{
     private Map<String, List<String>> waves = new HashMap<>();
     //waves      --> key : wave name
     //             value : ordre spawn enemi(s)
-    private Map<Enemy, Integer> enemies = new HashMap<>();
-    //enemies    --> key : Ennemi 
-    //             value : indice i de la prochaine case à atteidre
     private final MapGame map = new MapGame();
     private final Player player = new Player();
     private final Wave w = new Wave();
+    private final Fight combats = new Fight();
     private List<double[]> enemiesPatern;
-    private List<Tour> tours = new ArrayList<>();
 
-    private int enemyDestCase = 0;
+    private static List<Enemy> enemies = new ArrayList<>();
+    public static List<Tour> tours = new ArrayList<>();
+    public static List<Enemy> spawnedEnemies = new ArrayList<>();
+
     private int currentLvl = 1;
-    private int currentWve = 0;
+    private int currentWve = 1;
     private boolean running = true;
     private double totaltime = 0;
 
-    private double[] b1 = {855, 565, 138, 35};
-    private double[] b2 = {855, 490, 138, 35};
-    private double[] b3 = {855, 415, 138, 35};
-    private double[] b4 = {855, 340, 138, 35};
-    private double[] b5 = {855, 265, 138, 35};
-
-    double[] cc = {105, 525};
-    Tour tTest = new TArcher(cc);
-
-    private int test = 0;
+    private final double[] b1 = {855, 565, 138, 35};// TArcher
+    private final double[] b2 = {855, 490, 138, 35};// TEarthCaster
+    private final double[] b3 = {855, 415, 138, 35};
+    private final double[] b4 = {855, 340, 138, 35};
+    private final double[] b5 = {855, 265, 138, 35};
 
     public void launch (){
         init();
@@ -52,20 +47,12 @@ public class Game{
             update(deltaTimeSec);
         }
         if (player.getHp() > 0){
-            StdDraw.clear();
-            StdDraw.setPenColor(Color.BLACK);
-            StdDraw.setPenRadius(0.01);
-            StdDraw.text(512, 360, "Victoire !");
+            StdDraw.clear(Color.BLACK);
             StdDraw.setPenColor(Color.GREEN);
-            StdDraw.setPenRadius(0.002);
             StdDraw.text(512, 360, "Victoire !");
         }else{
-            StdDraw.clear();
-            StdDraw.setPenColor(Color.BLACK);
-            StdDraw.setPenRadius(0.01);
-            StdDraw.text(512, 360, "Perdu !");
+            StdDraw.clear(Color.BLACK);
             StdDraw.setPenColor(Color.RED);
-            StdDraw.setPenRadius(0.002);
             StdDraw.text(512, 360, "Perdu !");
         }
         StdDraw.show();
@@ -75,7 +62,6 @@ public class Game{
     }
     
     private void init(){
-        //Case S -> x=105.0 | y=595.0
         String filePath = "resources/games/game.g";
         try (BufferedReader readerLvl = new BufferedReader(new FileReader(filePath))) {//ouvrir fichier game.g
             String lvl;
@@ -112,76 +98,115 @@ public class Game{
         map.updateLvl(1, mapsPaterns.size(), 1, mapsPaterns.get("level1").size()-1);
         map.updateHpGold(100, 50);
         map.drawStore();
-        List<Enemy> ene = w.createEnemies("resources/waves/waveBoss.wve", map.getCaseS().getCoord().clone());
-        for (Enemy e : ene) enemies.put(e, 0);
+        enemies = w.createEnemies("resources/waves/waveMinion.wve", map.getCaseS().getCoord().clone());
         enemiesPatern = map.getEnnemyPatern();
-        player.setHp(9999);
-        List<double[]> testt = map.getEnnemyPatern();
-        
     }
     
-
     private void update(double deltaTimeSec){
         totaltime += deltaTimeSec;
         if (player.isAlive()){
             if (StdDraw.isMousePressed()) {
                 double[] coordMouse = {StdDraw.mouseX(), StdDraw.mouseY()};
                 map.updateClick(coordMouse);
-                if (map.getClikedCase()!=null){
+                if (map.getClikedCase()!=null){// vérifier si le joueur a cliqué sur un bouton du shop
                     if ((coordMouse[0] > b1[0]-b1[2])&&(coordMouse[0] < b1[0]+b1[2])&&
-                    (coordMouse[1] > b1[1]-b1[3])&&(coordMouse[1] < b1[1]+b1[3])){
-                        if(player.getGold() >= 0){
+                    (coordMouse[1] > b1[1]-b1[3])&&(coordMouse[1] < b1[1]+b1[3])){//bouton 1 TArcher
+                        if((player.getGold() >= 20)){
                             tours.add(new TArcher(map.getClikedCase().getCoord()));
                             player.setGold(player.getGold()-20);
                             map.updateHpGold(player.getHp(), player.getGold());
                             map.setClikedCaseNull();
                         }
+
                     } else if ((coordMouse[0] > b2[0]-b2[2])&&(coordMouse[0] < b2[0]+b2[2])&&
-                    (coordMouse[1] > b2[1]-b2[3])&&(coordMouse[1] < b2[1]+b2[3])){
+                    (coordMouse[1] > b2[1]-b2[3])&&(coordMouse[1] < b2[1]+b2[3])){//bouton 2 TEarthCaster
+                        if(player.getGold() >= 100){
+                            tours.add(new TEarthCaster(map.getClikedCase().getCoord()));
+                            player.setGold(player.getGold()-100);
+                            map.updateHpGold(player.getHp(), player.getGold());
+                            map.setClikedCaseNull();
+                        }
 
                     } else if ((coordMouse[0] > b3[0]-b3[2])&&(coordMouse[0] < b3[0]+b3[2])&&
-                    (coordMouse[1] > b3[1]-b3[3])&&(coordMouse[1] < b3[1]+b3[3])){
+                    (coordMouse[1] > b3[1]-b3[3])&&(coordMouse[1] < b3[1]+b3[3])){//bouton 3 TWaterCaster
+                        if(player.getGold() >= 50){
+                            tours.add(new TWaterCaster(map.getClikedCase().getCoord()));
+                            player.setGold(player.getGold()-50);
+                            map.updateHpGold(player.getHp(), player.getGold());
+                            map.setClikedCaseNull();
+                        }
 
                     } else if ((coordMouse[0] > b4[0]-b4[2])&&(coordMouse[0] < b4[0]+b4[2])&&
-                    (coordMouse[1] > b4[1]-b4[3])&&(coordMouse[1] < b4[1]+b4[3])){
+                    (coordMouse[1] > b4[1]-b4[3])&&(coordMouse[1] < b4[1]+b4[3])){//bouton 4 TFireCaster
+                        if(player.getGold() >= 100){
+                            tours.add(new TFireCaster(map.getClikedCase().getCoord()));
+                            player.setGold(player.getGold()-100);
+                            map.updateHpGold(player.getHp(), player.getGold());
+                            map.setClikedCaseNull();
+                        }
 
                     } else if ((coordMouse[0] > b5[0]-b5[2])&&(coordMouse[0] < b5[0]+b5[2])&&
-                    (coordMouse[1] > b5[1]-b5[3])&&(coordMouse[1] < b5[1]+b5[3])){
+                    (coordMouse[1] > b5[1]-b5[3])&&(coordMouse[1] < b5[1]+b5[3])){//bouton 5 TWindCaster
+                        if(player.getGold() >= 50){
+                            tours.add(new TWindCaster(map.getClikedCase().getCoord()));
+                            player.setGold(player.getGold()-50);
+                            map.updateHpGold(player.getHp(), player.getGold());
+                            map.setClikedCaseNull();
+                        }
                     }
                 }
             }
             map.drawCases();
-            for (Tour t : tours){
-                t.draw();
-            }
+            for (Tour t : tours) t.draw();
+
             List<Enemy> enemToRemove = new ArrayList<>();
-            for (Enemy e : enemies.keySet()){
+            List<Tour> tourToRemove = new ArrayList<>();
+            combats.fight(totaltime);
+            for (Tour t : tours){
+                if (t.getHp() <= 0) tourToRemove.add(t);
+            }
+            for (Enemy e : enemies){
                 if (totaltime >= e.getSpawn()) {
-                    int i = enemies.get(e);
-                    if (Arrays.equals(e.getCoord(), enemiesPatern.get(i)) && i < enemiesPatern.size() - 1) {
-                        enemies.put(e, enemies.get(e) + 1); // Mise à jour de l'indice de la case à atteindre
+                    int i = e.get_i();
+                    if ((Arrays.equals(e.getCoord(), enemiesPatern.get(i))) && i < enemiesPatern.size() - 1) {
+                        e.increment_i(); // Mise à jour de l'indice de la case à atteindre
                     }
                     if (Arrays.equals(e.getCoord(), enemiesPatern.get(i)) && i == enemiesPatern.size() - 1) {
-                        player.setHp(player.getHp() - e.getAtk());
+                        player.setHp(player.getHp() - (int)e.getAtk());
                         map.updateHpGold(player.getHp(), player.getGold());
                         enemToRemove.add(e);
                     }
                     if (e.alive()){
                         e.moveTo(enemiesPatern.get(i));
                         e.draw();
+                    } else{
+                        enemToRemove.add(e);
+                        player.setGold(player.getGold()+e.getReward());
+                    }
+                    if (e.isShow() && !spawnedEnemies.contains(e)){
+                        spawnedEnemies.add(e);
                     }
                 }
             }
+            if (!spawnedEnemies.isEmpty()){
+                List<Enemy> enemToRemove2 = new ArrayList<>();
+                for (Enemy e : spawnedEnemies){
+                    if (!e.isShow()) enemToRemove2.add(e);
+                }
+                for (Enemy e : enemToRemove2) spawnedEnemies.remove(e);
+            }
+            // faire disparaitre tout les ennemis qui sont mort ou qui ont atteind la case B
+            // faire disparaitre toutes les tours qui sont morte
             if (!enemToRemove.isEmpty()) {
-                for (Enemy e : enemToRemove) enemies.remove(e);
+                for (Enemy e : enemToRemove) {
+                    enemies.remove(e);
+                    e.setShow(false);
+                }
             }
-            if (enemies.isEmpty()){
-                currentWve +=1;
-            }
+            if (!tourToRemove.isEmpty()) for (Tour t : tourToRemove) tours.remove(t);
         }
         else running = false;
-        
-        map.drawStore();
+        map.updateHpGold(player.getHp(), player.getGold());
         StdDraw.show();
     } 
 }
