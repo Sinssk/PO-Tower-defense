@@ -1,0 +1,127 @@
+
+Pour manipuler des fichiers texte en Java avec Visual Studio Code, voici les étapes principales, de la configuration à la lecture et l’écriture de fichiers :
+
+### 1. Configurer le projet dans Visual Studio Code
+
+1. **Organiser les fichiers** : Assure-toi que la structure de ton projet est bien organisée. Par exemple :
+
+   ```
+   Projet PO/
+   ├── src/
+   │   └── App.java
+   └── resources/
+       └── games/
+           └── game.g
+   ```
+
+2. **Configurer le fichier `launch.json`** : Dans Visual Studio Code, assure-toi que ton dossier de travail est bien configuré pour que les chemins relatifs fonctionnent correctement. 
+   - Va dans `.vscode/launch.json` et vérifie que `"cwd"` (current working directory) pointe vers la racine de ton projet (`Projet PO`).
+   - Cela permettra aux chemins comme `"../resources/games/game.g"` de fonctionner correctement.
+
+### 2. Lire un fichier texte
+
+Pour lire un fichier texte, utilise `FileReader` ou `Files.readAllLines` :
+
+#### Avec `FileReader` et `BufferedReader`
+
+```java
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.IOException;
+
+public class App {
+    public static void main(String[] args) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("../resources/games/game.g"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+#### Avec `Files.readAllLines`
+
+```java
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.io.IOException;
+import java.util.List;
+
+public class App {
+    public static void main(String[] args) {
+        try {
+            List<String> lines = Files.readAllLines(Paths.get("../resources/games/game.g"));
+            for (String line : lines) {
+                System.out.println(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+### 3. Écrire dans un fichier texte
+
+Pour écrire dans un fichier, utilise `FileWriter` ou `Files.write` :
+
+#### Avec `FileWriter` et `BufferedWriter`
+
+```java
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+import java.io.IOException;
+
+public class App {
+    public static void main(String[] args) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("../resources/games/game.g", true))) {
+            writer.write("Nouvelle ligne de texte");
+            writer.newLine(); // Pour ajouter une nouvelle ligne
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+#### Avec `Files.write`
+
+```java
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.io.IOException;
+import java.util.Arrays;
+
+public class App {
+    public static void main(String[] args) {
+        try {
+            Files.write(Paths.get("../resources/games/game.g"), Arrays.asList("Nouvelle ligne de texte"), java.nio.file.StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+### 4. Exécuter le code
+
+Une fois le code prêt :
+
+1. Ouvre le terminal dans Visual Studio Code (ou utilise le raccourci `Ctrl + ` `).
+2. Compile ton code avec :
+
+   ```bash
+   javac src/App.java
+   ```
+
+3. Exécute le code avec :
+
+   ```bash
+   java -cp src App
+   ```
+
+Ces étapes devraient te permettre de manipuler des fichiers texte avec Java dans Visual Studio Code, en suivant une structure de projet organisée et un chemin correct pour les fichiers.

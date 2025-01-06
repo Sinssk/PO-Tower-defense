@@ -16,12 +16,6 @@ public class MapGame{
     private double currentY;
     private Case clikedCase;
 
-    private final double[] b1 = {855, 565, 138, 35};
-    private final double[] b2 = {855, 490, 138, 35};
-    private final double[] b3 = {855, 415, 138, 35};
-    private final double[] b4 = {855, 340, 138, 35};
-    private final double[] b5 = {855, 265, 138, 35};
-
     //cration de la fenêtre (x: [-12; 1012], y: [-10; 710]) --> 1024 X 720
     //taille map lvl --> x = patern.get(0).length() y = patern.size()
     //zone Map --> center: (350, 350), halfDist: (350, 350)
@@ -29,16 +23,16 @@ public class MapGame{
     //zone player --> center: (856, 641), halfDist: (144, 25)
     //zone store --> center: (856, 303), halfDist: (144, 303)
 
-    public void init(String mapFile){
-        loadMap(mapFile);
+    public void init(){
         StdDraw.setCanvasSize(1024, 720);
         StdDraw.setXscale(-12, 1012);
         StdDraw.setYscale(-10, 710);
         StdDraw.enableDoubleBuffering();
-        drawMap();
     }
 
-    private void loadMap(String fileName){
+    public void loadMap(String fileName){
+        coordPatern.clear();
+        cases.clear();
         List<String> map = new ArrayList<>();
         String filePath = "resources/maps/" + fileName + ".mtp";
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))){
@@ -128,7 +122,7 @@ public class MapGame{
         }
     }
 
-    private void drawMap(){
+    public void drawMap(){
         StdDraw.clear(new Color(202, 207, 210));//background
         StdDraw.setPenColor(new Color(44, 62, 80));
         StdDraw.filledRectangle(350, 350, 350, 350);//grille map
@@ -162,6 +156,7 @@ public class MapGame{
                 cases.get(y).get(x).draw();
             }
         }
+        
         if (mX != mY){//remplir l'espace vide
             StdDraw.setPenColor(new Color(119,136,153));
             if(mX < mY){// mX*(700/scale)+((mY-mX)*(700/scale))/2 = (700*(mX+mY))/(2*scale) 
@@ -302,48 +297,99 @@ public class MapGame{
     }
 
     public void drawStore(){
+        double[] b1 = Game.b1;
+        double[] b2 = Game.b2;
+        double[] b3 = Game.b3;
+        double[] b4 = Game.b4;
+        double[] b5 = Game.b5;
+
+        double[] b6 = Game.b6;
+        double[] b7 = Game.b7;
+        double[] b8 = Game.b8;
+        double[] b9 = Game.b9;
+
         StdDraw.setPenColor(new Color(202, 207, 210));
         StdDraw.filledRectangle(856, 303, 140, 300);//zone store
 
         StdDraw.setPenColor(Color.BLACK);
         StdDraw.rectangle(b1[0], b1[1], b1[2], b1[3]);//bouton Archer Tour
-        StdDraw.rectangle(b2[0], b2[1], b2[2], b2[3]);//bouton Earth Caster 
-        StdDraw.rectangle(b3[0], b3[1], b3[2], b3[3]);//bouton Water Caster 
-        StdDraw.rectangle(b4[0], b4[1], b4[2], b4[3]);//bouton Fire Caster 
-        StdDraw.rectangle(b5[0], b5[1], b5[2], b5[3]);//bouton Wind Caster 
+        StdDraw.rectangle(b2[0], b2[1], b2[2], b2[3]);//bouton Wind Caster
+        StdDraw.rectangle(b3[0], b3[1], b3[2], b3[3]);//bouton Water Caster
+        StdDraw.rectangle(b4[0], b4[1], b4[2], b4[3]);//bouton Fire Caster
+        StdDraw.rectangle(b5[0], b5[1], b5[2], b5[3]);//bouton Earth Caster
+        StdDraw.rectangle(b6[0], b6[1], b6[2], b6[3]);//bouton Ice Caster
+        StdDraw.rectangle(b7[0], b7[1], b7[2], b7[3]);//bouton Poison Caster
+        StdDraw.rectangle(b8[0], b8[1], b8[2], b8[3]);//bouton Gold Digger
+        StdDraw.rectangle(b9[0], b9[1], b9[2], b9[3]);//bouton Railgun
 
-        StdDraw.filledCircle(745, 565, 20);//Archer (Color.BLACK)
-        StdDraw.text(840, 585, "HP : 30 | ATK : 5");
-        StdDraw.text(852, 565, "SPD : 1 | RANGE : 2");
-        StdDraw.text(815, 545, "COST : 20");
-
-        StdDraw.setPenColor(new Color(0, 167, 15));//
-        StdDraw.filledCircle(745, 490, 20);//Earth Caster
-        StdDraw.setPenColor(Color.BLACK);
-        StdDraw.text(843, 510, "HP : 50 | ATK : 7");
-        StdDraw.text(868, 490, "SPD : 0.5 | RANGE : 2.5");
-        StdDraw.text(820, 470, "COST : 100");
-
-        StdDraw.setPenColor(new Color(6, 0, 160));
-        StdDraw.filledCircle(745, 415, 20);//Water Caster
-        StdDraw.setPenColor(Color.BLACK);
-        StdDraw.text(840, 435, "HP : 30 | ATK : 3");
-        StdDraw.text(852, 415, "SPD : 1 | RANGE : 4");
-        StdDraw.text(815, 395, "COST : 50");
-
-        StdDraw.setPenColor(new Color(184, 22, 1));
-        StdDraw.filledCircle(745, 340, 20);//Fire Caster
-        StdDraw.setPenColor(Color.BLACK);
-        StdDraw.text(845, 360, "HP : 30 | ATK : 10");
-        StdDraw.text(866, 340, "SPD : 0.5 | RANGE : 2.5");
-        StdDraw.text(815, 320, "COST : 30");
+        StdDraw.filledCircle(b1[0]-110, b1[1], 20);//Archer (Color.BLACK)
+        StdDraw.text(b1[0]-12, b1[1]+20, "HP : 300 | ATK : 5");
+        StdDraw.text(b1[0], b1[1], "SPD : 1 | RANGE : 2");
+        StdDraw.text(b1[0]-36, b1[1]-20, "COST : 20");
 
         StdDraw.setPenColor(new Color(242, 211, 0));
-        StdDraw.filledCircle(745, 265, 20);//Wind Caster 
+        StdDraw.filledCircle(b2[0]-110, b2[1], 20);//Wind Caster
         StdDraw.setPenColor(Color.BLACK);
-        StdDraw.text(840, 285, "HP : 30 | ATK : 5");
-        StdDraw.text(858, 265, "SPD : 1.5 | RANGE : 6");
-        StdDraw.text(813, 245, "COST : 50");
+        StdDraw.text(b2[0]-12, b2[1]+20, "HP : 300 | ATK : 5");
+        StdDraw.text(b2[0]+7, b2[1], "SPD : 1.5 | RANGE : 6");
+        StdDraw.text(b2[0]-36, b2[1]-20, "COST : 50");
+        
+        StdDraw.setPenColor(new Color(6, 0, 160));
+        StdDraw.filledCircle(b3[0]-110, b3[1], 20);//Water Caster
+        StdDraw.setPenColor(Color.BLACK);
+        StdDraw.text(b3[0]-12, b3[1]+20, "HP : 300 | ATK : 3");
+        StdDraw.text(b3[0], b3[1], "SPD : 1 | RANGE : 4");
+        StdDraw.text(b3[0]-36, b3[1]-20, "COST : 50");
+
+        StdDraw.setPenColor(new Color(184, 22, 1));
+        StdDraw.filledCircle(b4[0]-110, b4[1], 20);//Fire Caster
+        StdDraw.setPenColor(Color.BLACK);
+        StdDraw.text(b4[0]-8, b4[1]+20, "HP : 300 | ATK : 10");
+        StdDraw.text(b4[0]+13, b4[1], "SPD : 0.5 | RANGE : 2.5");
+        StdDraw.text(b4[0]-36, b4[1]-20, "COST : 100");
+
+        StdDraw.setPenColor(new Color(0, 167, 15));//
+        StdDraw.filledCircle(b5[0]-110, b5[1], 20);//Earth Caster
+        StdDraw.setPenColor(Color.BLACK);
+        StdDraw.text(b5[0]-12, b5[1]+20, "HP : 500 | ATK : 7");
+        StdDraw.text(b5[0]+14, b5[1], "SPD : 0.5 | RANGE : 2.5");
+        StdDraw.text(b5[0]-32, b5[1]-20, "COST : 100");
+
+        StdDraw.setPenColor(new Color(6, 0, 160));
+        StdDraw.filledSquare(b6[0]-110, b6[1], 21);
+        StdDraw.setPenColor(new Color(0, 255, 193));
+        StdDraw.filledSquare(b6[0]-110, b6[1], 19);//Ice Caster
+        StdDraw.setPenColor(Color.BLACK);
+        StdDraw.text(b6[0]-12, b6[1]+20, "HP : 400 | ATK : 1");
+        StdDraw.text(b6[0], b6[1], "SPD : 2 | RANGE : 5");
+        StdDraw.text(b6[0]-36, b6[1]-20, "COST : 70");
+
+        StdDraw.setPenColor(new Color(242, 211, 0));
+        StdDraw.filledSquare(b7[0]-110, b7[1], 21);
+        StdDraw.setPenColor(new Color(0, 167, 15));
+        StdDraw.filledSquare(b7[0]-110, b7[1], 19);//Poison Caster
+        StdDraw.setPenColor(Color.BLACK);
+        StdDraw.text(b7[0]-12, b7[1]+20, "HP : 500 | ATK : 1");
+        StdDraw.text(b7[0], b7[1], "SPD : 2 | RANGE : 5");
+        StdDraw.text(b7[0]-35, b7[1]-20, "COST : 80");
+
+        StdDraw.setPenColor(new Color(0, 167, 15));
+        StdDraw.filledSquare(b8[0]-110, b8[1], 21);
+        StdDraw.setPenColor(Color.YELLOW);//
+        StdDraw.filledSquare(b8[0]-110, b8[1], 19);//Gold Digger
+        StdDraw.setPenColor(Color.BLACK);
+        StdDraw.text(b8[0]-12, b8[1]+20, "HP : 200 | ATK : 1");
+        StdDraw.text(b8[0]+14, b8[1], "SPD : 2 | RANGE : 10");
+        StdDraw.text(b8[0]-32, b8[1]-20, "COST : 20");
+
+        StdDraw.setPenColor(new Color(184, 22, 1));
+        StdDraw.filledSquare(b9[0]-110, b9[1], 21);
+        StdDraw.setPenColor(Color.GRAY);//
+        StdDraw.filledSquare(b9[0]-110, b9[1], 19);//Railgun
+        StdDraw.setPenColor(Color.BLACK);
+        StdDraw.text(b9[0]-12, b9[1]+20, "HP : 200 | ATK : 1");
+        StdDraw.text(b9[0]+14, b9[1], "SPD : - | RANGE : -");
+        StdDraw.text(b9[0]-32, b9[1]-20, "COST : 150");
     }
 
     public Case getCaseS() {

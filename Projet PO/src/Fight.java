@@ -1,11 +1,18 @@
 import java.util.List;
 
+/**
+ * La classe Fight gère les combats entre les tours et les ennemis dans le jeu.
+ */
 public class Fight {
 
-    // Feu < Eau < Air < Terre < Feu < ...
-    public void fight(double deltatime){
-        for (Tour t : Game.tours){
-            if (deltatime > t.getLastAttack() + t.getAtkSpeed()){
+    /**
+     * Gère les combats entre les tours et les ennemis.
+     * 
+     * @param deltatime le temps écoulé depuis la dernière mise à jour
+     */
+    public void fight(double deltatime) {
+        for (Tour t : Game.tours) {
+            if (deltatime > t.getLastAttack() + t.getAtkSpeed()) {
                 List<Enemy> cibles = t.cible();
 
                 if (!cibles.isEmpty()) {
@@ -13,20 +20,28 @@ public class Fight {
                 }
             }
         }
-        
-        for (Enemy e : Game.spawnedEnemies){
-            if (deltatime > e.getLastAttack() + e.getAtkSpeed()){
+
+        for (Enemy e : Game.spawnedEnemies) {
+            // enlever les pv des ennemis empoisonnés 
+            if (e.getPoisoned() > 0) e.poisoned(deltatime);
+
+            if (deltatime > e.getLastAttack() + e.getAtkSpeed()) {
                 List<Tour> cibles = e.cible();
                 if (!cibles.isEmpty()) {
-
                     for (Tour t : cibles) enemyAttaque(e, t, deltatime);
                 }
             }
         }
     }
 
-    private void tourAttaque(Tour t, Enemy e, double deltatime){
-        
+    /**
+     * Gère l'attaque d'une tour sur un ennemi.
+     * 
+     * @param t la tour qui attaque
+     * @param e l'ennemi attaqué
+     * @param deltatime le temps écoulé depuis la dernière mise à jour
+     */
+    private void tourAttaque(Tour t, Enemy e, double deltatime) {
         double multipli = 1;
         switch (e.getElement()) {
             case FIRE -> {
@@ -54,11 +69,18 @@ public class Fight {
                 }
             }
         }
-        e.setHp(e.getHp()-t.getAtk()*multipli);
+        e.setHp(e.getHp() - t.getAtk() * multipli);
         t.setLastAttack(deltatime);
     }
 
-    private void enemyAttaque(Enemy e, Tour t, double deltatime){
+    /**
+     * Gère l'attaque d'un ennemi sur une tour.
+     * 
+     * @param e l'ennemi qui attaque
+     * @param t la tour attaquée
+     * @param deltatime le temps écoulé depuis la dernière mise à jour
+     */
+    private void enemyAttaque(Enemy e, Tour t, double deltatime) {
         double multipli = 1;
         switch (t.getElement()) {
             case FIRE -> {
@@ -86,7 +108,7 @@ public class Fight {
                 }
             }
         }
-        t.setHp(t.getHp()-e.getAtk()*multipli);
+        t.setHp(t.getHp() - e.getAtk() * multipli);
         e.setLastAttack(deltatime);
     }
 }
